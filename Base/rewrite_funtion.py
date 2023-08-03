@@ -1,11 +1,12 @@
 import os
+import shutil
 
 from airtest.core.api import connect_device
-from airtest.core.helper import G, set_logdir
-from airtest.utils.compat import script_log_dir
+from airtest.core.helper import G
+from airtest.core.settings import Settings as ST
 
 
-def only_auto_setup(basedir=None, devices=None):
+def only_auto_setup(basedir=None, devices=None, project_root=None, compress=None):
     """
     只对设备进行初始化连接
     """
@@ -17,12 +18,15 @@ def only_auto_setup(basedir=None, devices=None):
     if devices:
         for dev in devices:
             connect_device(dev)
+    if project_root:
+        ST.PROJECT_ROOT = project_root
+    if compress:
+        ST.SNAPSHOT_QUALITY = compress
 
 
-def only_setup_logdir(basedir=None, logdir=None):
-    """
-    只对logdir进行设置
-    """
-    if logdir:
-        logdir = script_log_dir(basedir, logdir)
-        set_logdir(logdir)
+def only_setup_logdir(logdir):
+    if os.path.exists(logdir):
+        shutil.rmtree(logdir)
+    os.mkdir(logdir)
+    ST.LOG_DIR = logdir
+    G.LOGGER.set_logfile(os.path.join(ST.LOG_DIR, ST.LOG_FILE))
