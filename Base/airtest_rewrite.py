@@ -27,6 +27,6 @@ def only_auto_setup(basedir=None, devices=None, project_root=None, compress=None
 def only_setup_logdir(logdir):
     if os.path.exists(logdir):
         shutil.rmtree(logdir)
-    os.mkdir(logdir)
+    os.makedirs(logdir, exist_ok=True)
     ST.LOG_DIR = logdir
     G.LOGGER.set_logfile(os.path.join(ST.LOG_DIR, ST.LOG_FILE))
