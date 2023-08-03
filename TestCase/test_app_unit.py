@@ -1,7 +1,4 @@
-__author__ = "QKY"
-
-import time
-
+__author__ = "KY"
 from airtest.core.api import *
 from airtest.cli.parser import cli_setup
 from airtest.report.report import simple_report
