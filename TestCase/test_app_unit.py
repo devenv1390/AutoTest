@@ -10,6 +10,27 @@ from Base.base_setting import LogsDIR, PictureDIR, ReportDIR
 from Base.rewrite_funtion import only_auto_setup, only_setup_logdir
 
 
+def get_parameter(log_name):
+    def outer(func):
+        def inner(self, *args, **kwargs):
+            only_setup_logdir(LogsDIR + log_name)
+            try:
+                arg = func(self, *args, **kwargs)
+            except Exception as e:
+                print("exception: ", e)
+                log(e, snapshot=True)
+                raise e
+            finally:
+                simple_report(__file__, logpath=LogsDIR + log_name, output=ReportDIR + log_name + ".html")
+                while not self.poco(text="康康Need").exists():
+                    keyevent("BACK")
+            return arg
+
+        return inner
+
+    return outer
+
+
 class TestApp(unittest.TestCase):
     def setUp(self) -> None:
         pass
@@ -36,42 +57,24 @@ class TestApp(unittest.TestCase):
     def tearDownClass(cls) -> None:
         stop_app("com.example.kkneed")
 
+    @get_parameter("novel")
     def test_novel(self):
-        only_setup_logdir(LogsDIR + "novel_log")
-        try:
-            self.poco(text="健康食品知多少？").click()
-            assert_exists(
-                Template(PictureDIR + "tpl1690783871394.png", record_pos=(0.005, -0.939), resolution=(1080, 2340)),
-                "进入动态详情页")
-            keyevent("BACK")
-        except Exception as e:
-            print("exception:", e)
-            log(e, desc="描述信息", snapshot=True)
-            raise e
-        finally:
-            simple_report(__file__, logpath=LogsDIR + "novel_log", output=ReportDIR + "novel.html")
-            while not self.poco(text="康康Need").exists():
-                keyevent("BACK")
+        self.poco(text="健康食品知多少？").click()
+        assert_exists(
+            Template(PictureDIR + "tpl1690783871394.png", record_pos=(0.005, -0.939), resolution=(1080, 2340)),
+            "进入动态详情页")
+        keyevent("BACK")
 
+    @get_parameter("shopping")
     def test_shopping(self):
-        only_setup_logdir(LogsDIR + "shopping_log")
-        try:
-            self.poco("androidx.compose.ui.platform.ComposeView").child("android.view.View").child(
-                "android.view.View").child(
-                "android.view.View").child("android.view.View").child("android.view.View")[1].child(
-                "android.view.View").click()
-            assert_exists(
-                Template(PictureDIR + "tpl1690784399694.png", record_pos=(-0.01, -0.141), resolution=(1080, 2340)),
-                "进入商城")
-            keyevent("BACK")
-        except Exception as e:
-            print("exception:", e)
-            log(e, desc="描述信息", snapshot=True)
-            raise e
-        finally:
-            simple_report(__file__, logpath=LogsDIR + "shopping_log", output=ReportDIR + "shopping.html")
-            while not self.poco(text="康康Need").exists():
-                keyevent("BACK")
+        self.poco("androidx.compose.ui.platform.ComposeView").child("android.view.View").child(
+            "android.view.View").child(
+            "android.view.View").child("android.view.View").child("android.view.View")[1].child(
+            "android.view.View").click()
+        assert_exists(
+            Template(PictureDIR + "tpl1690784399694.png", record_pos=(-0.01, -0.141), resolution=(1080, 2340)),
+            "进入商城")
+        keyevent("BACK")
 
 
 if __name__ == '__main__':
