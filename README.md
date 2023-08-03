@@ -1,0 +1,3 @@
+# AutoTest
+基于poco和airtest的自动测试集成框架
+集成了unittest,BeautifulReport
