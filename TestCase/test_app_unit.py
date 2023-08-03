@@ -12,11 +12,10 @@ from Base.base_setting import LogsDIR, PictureDIR, ReportDIR
 from Base.airtest_rewrite import only_auto_setup, only_setup_logdir
 
 
-def get_parameter(log_name, case_desc=""):
+def get_parameter(*_args, **_kwargs):
     def outer(func):
         def inner(self, *args, **kwargs):
-            self.__dict__['_testMethodDoc'] = case_desc
-            only_setup_logdir(LogsDIR + log_name)
+            only_setup_logdir(LogsDIR + _kwargs['log_name'])
             self.__dict__['_start_time'] = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
             try:
                 arg = func(self, *args, **kwargs)
@@ -25,8 +24,10 @@ def get_parameter(log_name, case_desc=""):
                 log(e, snapshot=True)
                 raise e
             finally:
-                simple_report(__file__, logpath=LogsDIR + log_name, output=ReportDIR + log_name + ".html")
-                self.__dict__['_html_path'] = ReportDIR + log_name + ".html"
+                simple_report(__file__, logpath=LogsDIR + _kwargs['log_name'],
+                              output=ReportDIR + _kwargs['log_name'] + ".html")
+                self.__dict__['_html_path'] = ReportDIR + _kwargs['log_name'] + ".html"
+                self.__dict__['_testMethodDoc'] = _kwargs['case_desc']
                 while not self.poco(text="康康Need").exists():
                     keyevent("BACK")
             return arg
@@ -62,7 +63,7 @@ class TestApp(unittest.TestCase):
     def tearDownClass(cls) -> None:
         stop_app("com.example.kkneed")
 
-    @get_parameter("novel", "测试文章详情页")
+    @get_parameter(log_name="novel", case_desc="测试文章详情页")
     def test_novel(self):
         self.poco(text="健康食品知多少？").click()
         assert_exists(
@@ -70,7 +71,7 @@ class TestApp(unittest.TestCase):
             "进入动态详情页")
         keyevent("BACK")
 
-    @get_parameter("shopping", "测试商城页")
+    @get_parameter(log_name="shopping", case_desc="测试商城页")
     def test_shopping(self):
         self.poco("androidx.compose.ui.platform.ComposeView").child("android.view.View").child(
             "android.view.View").child(
